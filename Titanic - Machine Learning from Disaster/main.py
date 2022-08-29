@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set() # setting seaborn default for plots
 
-import torch
-from torch import nn, optim
 from models import MLP
+
+import tensorflow as tf
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import classification_report
@@ -32,10 +32,6 @@ def bar_chart(feature):
 
 
 if __name__ == "__main__":
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    print('CUDA:', torch.cuda.is_available(), '     Use << {} >>'.format(device.upper()))
-    print('PyTorch Version:', torch.__version__)
-
     data_path = "D:/Kaggle/Titanic - Machine Learning from Disaster/"
     train = pd.read_csv(data_path + "train.csv")
     test = pd.read_csv(data_path + "test.csv")
@@ -102,42 +98,29 @@ if __name__ == "__main__":
     test = test.drop(features_drop, axis=1)
     train = train.drop(['PassengerId'], axis=1)
 
-    train_data = train.drop('Survived', axis=1)
-    target = train['Survived']
+    train_data = np.asarray(train.drop('Survived', axis=1))
+    target = np.asarray(pd.Categorical(train['Survived']))
 
     # model = RandomForestClassifier()
-    model = MLP().to(device)
+    model = tf.keras.models.Sequential([
+                tf.keras.layers.Dense(8, activation='relu'),
+                tf.keras.layers.Dense(16, activation='relu'),
+                tf.keras.layers.Dense(8, activation='relu'),
+                tf.keras.layers.Dense(1, activation='sigmoid')
+                ])
 
-    lr = 1e-3
-    loss_fn = nn.CrossEntropyLoss().to(device)
-    optimizer = optim.SGD(model.parameters(), lr=lr)
+    model.compile(optimizer='adam',
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
 
-    k_fold = KFold(n_splits=5, shuffle=True, random_state=3407)
-    k = 1
-    for train_index, valid_index in k_fold.split(train_data, target):
-        train, valid = train_data.iloc[train_index], train_data.iloc[train_index]
-        target_train, target_valid = target.iloc[train_index], target.iloc[train_index]
+    model.fit(train_data, target, epochs=20)
 
-        pred = model(train)
-        loss = loss_fn(pred, target_train)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        # model.fit(train, target_train)
-
-        # Predicting y for X_val
-        # pred = model.predict(valid)
-
-        # print("%d번째 fold, accuracy : %f" %(k, accuracy_score(pred, target_valid)))
-        # k += 1
-
-    test_data = test.drop("PassengerId", axis=1).copy()
-    prediction = model.predict(test_data)
-
-    submission = pd.DataFrame({
-        "PassengerId": test["PassengerId"],
-        "Survived": prediction
-    })
-
-    submission.to_csv('submission.csv', index=False)
+    # test_data = test.drop("PassengerId", axis=1).copy()
+    # prediction = model.predict(test_data)
+    #
+    # submission = pd.DataFrame({
+    #     "PassengerId": test["PassengerId"],
+    #     "Survived": prediction
+    # })
+    #
+    # submission.to_csv('submission.csv', index=False)
