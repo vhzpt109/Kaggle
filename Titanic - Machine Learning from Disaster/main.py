@@ -104,7 +104,6 @@ if __name__ == "__main__":
     # model = RandomForestClassifier()
     model = tf.keras.models.Sequential([
                 tf.keras.layers.Dense(8, activation='relu'),
-                tf.keras.layers.Dense(16, activation='relu'),
                 tf.keras.layers.Dense(8, activation='relu'),
                 tf.keras.layers.Dense(1, activation='sigmoid')
                 ])
@@ -113,14 +112,15 @@ if __name__ == "__main__":
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
 
-    model.fit(train_data, target, epochs=20)
+    model.fit(train_data, target, epochs=10)
 
-    # test_data = test.drop("PassengerId", axis=1).copy()
-    # prediction = model.predict(test_data)
-    #
-    # submission = pd.DataFrame({
-    #     "PassengerId": test["PassengerId"],
-    #     "Survived": prediction
-    # })
-    #
-    # submission.to_csv('submission.csv', index=False)
+    test_data = test.drop("PassengerId", axis=1).copy()
+    prediction = model.predict(test_data)
+    prediction = np.ndarray.round(decimals=1)
+
+    submission = pd.DataFrame({
+        "PassengerId": test["PassengerId"],
+        "Survived": prediction
+    })
+
+    submission.to_csv('submission.csv', index=False)
