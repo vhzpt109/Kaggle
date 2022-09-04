@@ -1,17 +1,17 @@
-from torch import nn
+import tensorflow as tf
 
 
-class MLP(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.flatten = nn.Flatten()
-        self.layer = nn.Sequential(
-            nn.Linear(8, 32),
-            nn.Linear(32, 16),
-            nn.Linear(16, 2),
-        )
+class MLP(tf.keras.Model):
+    def __init__(self, num_classes=1):
+        super(MLP, self).__init__(name='mlp')
+        self.num_classes = num_classes
 
-    def forward(self, x):
-        x = self.flatten(x)
-        prediction = self.layer(x)
-        return prediction
+        self.dense1 = tf.keras.layers.Dense(8, activation='relu')
+        self.dense2 = tf.keras.layers.Dense(8, activation='relu')
+        self.dense3 = tf.keras.layers.Dense(num_classes, activation='sigmoid')
+
+    def call(self, inputs):
+        x = self.dense1(inputs)
+        x = self.dense2(x)
+
+        return self.dense3(x)
