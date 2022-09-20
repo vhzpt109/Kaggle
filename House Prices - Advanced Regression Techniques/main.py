@@ -13,23 +13,10 @@ if __name__ == "__main__":
     train = pd.read_csv(data_path + "train.csv")
     test = pd.read_csv(data_path + "test.csv")
 
-    print(train.head())
+    # print(train.head())
     # train, test = DataProcess(train, test)
-
-    train.set_index('Id', inplace=True)
-    test.set_index('Id', inplace=True)
-    len_train_df = len(train)
-    len_test_df = len(test)
-
-    corrmat = train.corr()
-    top_corr_features = corrmat.index[abs(corrmat["SalePrice"]) >= 0.3]
-
-    # heatmap
-    plt.figure(figsize=(13, 10))
-    g = sns.heatmap(train[top_corr_features].corr(), annot=True, cmap="RdYlGn")
-
-    de = 10
-    de = 20
+    print("train is null :", train.isnull().sum())
+    print("test is null :", test.isnull().sum())
 
 
     # prediction = []
